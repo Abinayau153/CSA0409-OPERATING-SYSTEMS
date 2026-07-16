@@ -1,0 +1,91 @@
+1
+A) Time Sharing operating system suitable for this environment because it will allow multiple users to perfom simultaneously on a shared linux server by allocating cpu time 
+to each users in small slices and working it efficiently.
+B) Process Scheduling – Manages CPU time and schedules multiple user processes.
+memory management – Allocates, deallocates, and protects memory for each process.
+C) start
+pid = fork()
+if pid== 0
+print"child pid=",get pid()
+print"parent pid=",get pid()
+Else
+    Print "Parent PID =", getpid()
+    Print "Child PID =", pid
+End If
+
+Stop
+2
+A) create() or open()
+write()
+read()
+close()
+B) open()
+open an existing file or create a new file to read and write
+write() 
+write data from program into the file
+C)
+Start
+fd = open("student.txt", CREATE | WRITE)
+write(fd, "Abi")
+close(fd)
+Stop
+
+3
+A)open() = open the source file
+create() or open()= create or open the file
+read()= read data from the file
+write()= write data in the file
+close()=close the file
+B) read()= read data from the file
+write()=write data in the final file
+C) #include <fcntl.h>
+#include <unistd.h>
+
+int main() {
+    int s, d, n;
+    char b[100];
+
+    s = open("a.txt", O_RDONLY);
+    d = creat("b.txt", 0644);
+
+    n = read(s, b, 100);
+    write(d, b, n);
+
+    close(s);
+    close(d);
+    return 0;
+}
+4
+A) fork()=create new child processes by duplicating the parent process
+exec()= replace current process with a new
+B) wait() = wait makes the parent process wait until the child process finishes the execution
+c) #include <unistd.h>
+#include <sys/wait.h>
+
+int main() {
+    if (fork() == 0)
+        execl("/bin/ls", "ls", NULL);
+    else
+        wait(NULL);
+    return 0;
+}
+5
+A) organizes file efficiently
+stores and retrives data
+provides file security and access control
+file storage
+B) open()= open a file and returns a file descriptor
+close()= close the file and release system resources
+C) #include <fcntl.h>
+#include <unistd.h>
+
+int main() {
+    int fd;
+    char buf[100];
+
+    fd = open("data.txt", O_RDONLY);
+    read(fd, buf, 100);
+    close(fd);
+
+    return 0;
+}
