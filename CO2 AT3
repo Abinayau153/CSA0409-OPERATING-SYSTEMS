@@ -1,0 +1,164 @@
+1. Deadlock Debugging (10 Marks)
+Exact Condition Causing Deadlock
+
+The deadlock occurs because P1 and P2 acquire the resources in different orders.
+
+P1 locks R1 first and waits for R2.
+P2 locks R2 first and waits for R1.
+
+This creates a Circular Wait condition.
+
+Deadlock Conditions
+
+The four Coffman conditions are satisfied:
+
+Mutual Exclusion – Only one process can use a resource at a time.
+Hold and Wait – Each process holds one resource while waiting for another.
+No Preemption – Resources cannot be forcibly taken away.
+Circular Wait – P1 waits for R2 while P2 waits for R1.
+
+Hence, the system enters a deadlock.
+
+Optimization
+
+Use a fixed resource ordering.
+
+Both processes should always acquire resources in the same order:
+
+lock(R1)
+lock(R2)
+Critical Section
+unlock(R2)
+unlock(R1)
+
+This removes the circular wait condition and eliminates deadlock.
+
+Q2. CPU Utilization Problem (10 Marks)
+Cause
+
+The scheduler log shows:
+
+Ready → Waiting → Ready → Waiting
+
+This indicates that processes are frequently waiting for I/O operations.
+
+Therefore:
+
+CPU remains idle while processes wait for I/O.
+CPU utilization drops to 30%.
+Debugging
+
+The system is I/O-bound rather than CPU-bound.
+
+Processes spend more time waiting than executing.
+
+Optimizations
+Increase the degree of multiprogramming so another process can use the CPU while one waits.
+Improve I/O performance using faster disks, SSDs, DMA, or asynchronous I/O.
+Result
+
+CPU utilization increases because the processor spends less time idle.
+
+Q3. Memory Bottleneck Debugging (10 Marks)
+Given
+Code = 5 MB
+Heap = 150 MB
+Stack = 1 MB per thread
+Threads = 25
+RAM = 2 GB
+Analysis
+
+Total stack memory
+
+= 25 × 1 MB
+
+= 25 MB
+
+Total memory
+
+= Code + Heap + Stack
+
+= 5 + 150 + 25
+
+= 180 MB
+
+Although total memory fits into RAM, the program experiences frequent page faults because:
+
+Large heap causes poor memory locality.
+Multiple threads increase memory accesses.
+Pages are frequently swapped between RAM and memory.
+Optimizations
+Reduce heap usage and optimize memory allocation.
+Reduce thread stack size or decrease the number of threads using a thread pool.
+Result
+Fewer page faults
+Better memory utilization
+Improved performance
+Q4. Starvation Debugging (10 Marks)
+Root Cause
+
+The scheduler has three queues:
+
+Q1 – Interactive (Highest Priority)
+Q2 – System
+Q3 – Batch
+
+Process P5 is in Q3.
+
+Whenever Q1 or Q2 receives new processes, they are executed first.
+
+Therefore, P5 never gets CPU time.
+
+This is called Starvation (Indefinite Blocking).
+
+Optimization
+
+Use Aging.
+
+Increase the priority of P5 gradually as it waits.
+
+Eventually P5 moves to a higher priority queue and gets CPU time.
+
+Result
+Fair scheduling
+No starvation
+Better response for long-waiting processes
+Q5. Context-Switch Overhead Debugging (10 Marks)
+Cause
+
+Given:
+
+Context switches = 20,000/sec
+Burst time = 2 ms
+Time quantum = 1 ms
+High I/O frequency
+
+Since the quantum (1 ms) is smaller than the burst time (2 ms):
+
+Threads are preempted before completing.
+Frequent I/O causes additional switches.
+
+Hence, the CPU performs excessive context switching instead of useful work.
+
+Optimizations
+
+1. Increase Time Quantum
+
+Increase quantum from 1 ms to 4–5 ms.
+
+This reduces unnecessary preemption.
+
+2. Reduce I/O Waiting
+
+Use:
+
+Asynchronous I/O
+Buffering
+Thread pools
+
+to reduce waiting time and context switches.
+
+Result
+Lower context-switch overhead
+Higher CPU efficiency
+Improved system throughput
