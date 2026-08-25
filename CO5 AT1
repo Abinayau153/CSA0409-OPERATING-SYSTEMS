@@ -1,0 +1,164 @@
+Optimized Linux File System Layout – 50 GB
+/ (root): 10 GB – OS, applications and essential system files.
+/var: 15 GB – logs, caches and variable data.
+/home: 15 GB – user files.
+/tmp: 5 GB – temporary files.
+Swap: 5 GB – memory support.
+Log management
+
+Use logrotate to prevent logs from consuming the disk.
+
+Example:
+
+/var/log/*.log {
+    daily
+    rotate 7
+    compress
+    size 1G
+    missingok
+    notifempty
+}
+Keep /var separate so log growth cannot fill the root filesystem.
+Set log rotation and compression.
+Use df -h and du -sh to monitor disk usage.
+Configure alerts when /var reaches about 80–85%.
+Reserve free space for critical services.
+
+Result: Logs are controlled below the 10 GB requirement, while separate partitions prevent one type of data from exhausting the entire 50 GB disk.
+
+02. Kernel-Level Optimization for High CPU Workloads
+
+The main problem is excessive context switching, which wastes CPU time.
+
+Optimization techniques
+
+Tune the scheduler
+
+Use nice and renice to control process priority.
+nice -n -5 ./program
+renice -n -5 -p PID
+
+CPU affinity
+
+Bind important real-time processes to selected CPUs.
+taskset -c 2,3 ./program
+
+Real-time scheduling
+
+Use SCHED_FIFO or SCHED_RR for time-critical tasks.
+chrt -f 80 ./program
+Reduce unnecessary kernel activity
+Disable unused services and unnecessary kernel modules.
+Kernel modules
+Load only required modules using modprobe.
+Remove unused modules using modprobe -r.
+
+Monitor context switches
+
+vmstat 1
+pidstat -w 1
+
+Result: Proper scheduler tuning, CPU affinity and real-time priorities reduce unnecessary context switching and improve response time without requiring hardware upgrades.
+
+03. Processing 1 Million Log Entries Efficiently
+
+For 1 million entries, avoid slow shell loops such as while read. Use optimized commands that process data internally.
+
+Example
+#!/bin/bash
+grep "ERROR" app.log | sort | uniq -c > error_count.txt
+awk '{print $1}' app.log | sort | uniq -c > status_count.txt
+
+For multiple operations, awk is especially efficient:
+
+awk '/ERROR/{e++} /WARNING/{w++} END{print "Errors:",e,"Warnings:",w}' app.log
+Commands used
+grep – fast pattern searching.
+awk – processes records in a single pass.
+sort – efficient sorting of large datasets.
+uniq – removes/counts duplicate entries.
+Pipelines (|) – avoid unnecessary intermediate files.
+
+For very large logs, process compressed logs with suitable tools and avoid repeatedly scanning the same file.
+
+Result: Using awk, grep, and pipelines minimizes process creation and disk I/O, making processing of 1 million entries within 2 minutes achievable on suitable hardware.
+
+04. Managing a Faulty Process Consuming 90% CPU
+
+The system should not be restarted because critical services must remain available.
+
+Step 1 – Identify the process
+top
+
+or:
+
+ps aux --sort=-%cpu | head
+
+Find the process with approximately 90% CPU usage and note its PID.
+
+Step 2 – Monitor it
+top -p PID
+
+or:
+
+pidstat -p PID 1
+Step 3 – Reduce its priority
+renice 10 -p PID
+
+This allows critical processes to receive CPU time first.
+
+Step 4 – Stop or restart the faulty process
+
+Try graceful termination:
+
+kill PID
+
+If it does not respond:
+
+kill -9 PID
+
+If it is a system service:
+
+systemctl restart service_name
+Step 5 – Verify
+top
+systemctl status service_name
+
+Result: The faulty process can be identified, monitored and controlled without rebooting the server, while critical services continue running.
+
+05. RAM Allocation for 5 Virtual Machines
+Given
+Total RAM = 16 GB
+Host OS requirement = 4 GB
+Available for VMs = 12 GB
+Number of VMs = 5
+Minimum per VM = 2 GB
+
+Required VM RAM:
+
+5 × 2 GB = 10 GB
+
+Therefore:
+
+16 − 4 − 10 = 2 GB remaining
+
+Proposed allocation
+Resource	RAM
+Host OS	4 GB
+VM1	2 GB
+VM2	2 GB
+VM3	2 GB
+VM4	2 GB
+VM5	2 GB
+Remaining	2 GB
+Total	16 GB
+Efficient strategy
+Allocate 2 GB minimum to each VM.
+Keep 4 GB reserved for the host.
+Use the remaining 2 GB as host/virtualization overhead reserve.
+Use memory ballooning if supported.
+Avoid assigning more RAM than required.
+Monitor RAM using virtualization tools.
+If workloads vary, dynamically adjust VM memory.
+
+Result: All 5 VMs meet their 2 GB minimum requirement, the host retains its required 4 GB, and 2 GB remains available as a safety/overhead reserve.
